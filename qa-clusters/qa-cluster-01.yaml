@@ -48,7 +48,7 @@ spec:
       machineDeployments:
         - class: node-pool
           name: cluster-01-np-wqbe
-          replicas: 1
+          replicas: 2
           metadata:
             annotations:
               run.tanzu.vmware.com/resolve-os-image: os-name=photon
