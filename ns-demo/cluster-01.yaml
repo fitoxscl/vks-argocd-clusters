@@ -48,10 +48,11 @@ spec:
       machineDeployments:
         - class: node-pool
           name: cluster-01-np-wqbe
-          replicas: 1
           metadata:
             annotations:
               run.tanzu.vmware.com/resolve-os-image: os-name=photon
+              cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "1"
+              cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "2"
           variables:
             overrides:
               - name: vmClass
