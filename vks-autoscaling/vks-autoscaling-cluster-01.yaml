@@ -1,0 +1,59 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: vks-demo-01
+  namespace: ns-autoscaling
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+        - 192.168.156.0/20
+    services:
+      cidrBlocks:
+        - 10.96.0.0/12
+    serviceDomain: cluster.local
+  topology:
+    class: builtin-generic-v3.3.0
+    version: v1.32.3---vmware.1-fips-vkr.2
+    variables:
+      - name: vsphereOptions
+        value:
+          persistentVolumes:
+            availableStorageClasses:
+              - vsan-storage-policy
+            defaultStorageClass: vsan-storage-policy
+      - name: kubernetes
+        value:
+          certificateRotation:
+            enabled: true
+            renewalDaysBeforeExpiry: 90
+      - name: osConfiguration
+        value:
+          trust:
+            additionalTrustedCAs:
+              - caCert:
+                  secretRef:
+                    key: harbor-ca
+                    name: harbor-trusted-ca-secret
+      - name: vmClass
+        value: best-effort-medium
+      - name: storageClass
+        value: vsan-storage-policy
+    controlPlane:
+      replicas: 1
+      metadata:
+        annotations:
+          run.tanzu.vmware.com/resolve-os-image: os-name=photon
+    workers:
+      machineDeployments:
+        - class: node-pool
+          name: vks-cluster-01-np-wqbe
+          metadata:
+            annotations:
+              run.tanzu.vmware.com/resolve-os-image: os-name=photon
+              cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "1"
+              cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "5"
+          variables:
+            overrides:
+              - name: vmClass
+                value: best-effort-large
